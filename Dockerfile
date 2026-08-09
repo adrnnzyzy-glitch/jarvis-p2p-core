@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Instalar dependencias del proyecto usando poetry
 # Forzamos que poetry instale directamente en nuestro /opt/venv/
 RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-interaction --no-ansi
+    && poetry install --only main --no-interaction --no-ansi --no-root
 
 # Copiar el código fuente del orquestador
 COPY jarvis/ jarvis/
