@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "jarvis-p2p-core"
+version = "0.1.0"
+description = "Orquestador P2P Avanzado para Binance USDT/VES"
+authors = ["CEO JARVIS"]
+readme = "README.md"
+packages = [{include = "jarvis"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.0"
+pydantic-settings = "^2.0"
+fastapi = "^0.100"
+uvicorn = {extras = ["standard"], version = "^0.23"}
+asyncpg = "^0.28.0"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0"}
+alembic = "^1.11"
+aiogram = "^3.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4"
+pytest-asyncio = "^0.21"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
