@@ -17,7 +17,8 @@ class BinanceP2PClient:
             "asset": asset,
             "tradeType": trade_type,
             "fiat": fiat,
-            "publisherType": None
+            "publisherType": "merchant",
+            "payTypes": ["Banesco"]
         }
         if trans_amount:
             payload["transAmount"] = trans_amount
