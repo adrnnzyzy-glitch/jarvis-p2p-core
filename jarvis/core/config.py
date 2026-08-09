@@ -1,4 +1,5 @@
 from typing import Optional
+from decimal import Decimal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -10,7 +11,8 @@ class Settings(BaseSettings):
     # Variables críticas (ejemplo)
     environment: str = "development"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/jarvis_db"
-    admin_telegram_ids: list[int] = [123456789] # ID de admin por defecto
+    admin_telegram_ids: list[int] = [8702518274] # ID de admin por defecto
+    min_net_margin_pct: Decimal = Decimal("0.008") # Regla de protección de capital
     
     # Variables NO vitales (Obligatoriamente opcionales)
     binance_rsa_private_key: Optional[str] = None

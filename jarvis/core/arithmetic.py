@@ -51,3 +51,38 @@ class ArithmeticEngine:
         # Profit final
         net_profit_ves = revenue_ves - cost_ves
         return net_profit_ves
+
+    def calculate_margin_pct(self, usdt_volume: Decimal | str, buy_rate_ves: Decimal | str, sell_rate_ves: Decimal | str) -> Decimal:
+        """
+        Calcula el porcentaje de margen neto (Ganancia Neta / Costo).
+        """
+        vol = self.validate_usdt_quantity(usdt_volume)
+        buy_rate = Decimal(str(buy_rate_ves))
+        sell_rate = Decimal(str(sell_rate_ves))
+        
+        cost_ves = vol * buy_rate
+        if cost_ves == Decimal("0"):
+            return Decimal("0")
+            
+        net_profit_ves = self.calculate_net_profit(vol, buy_rate, sell_rate)
+        return net_profit_ves / cost_ves
+
+    def calculate_minimum_sell_price(self, buy_rate_ves: Decimal | str, min_margin_pct: Decimal | str) -> Decimal:
+        """
+        Calcula el precio mínimo de venta para garantizar el min_margin_pct.
+        """
+        buy_rate = Decimal(str(buy_rate_ves))
+        margin = Decimal(str(min_margin_pct))
+        
+        min_sell_rate = ((margin + Decimal("1")) * buy_rate) / (Decimal("1") - self.maker_fee)
+        return min_sell_rate
+
+    def calculate_maximum_buy_price(self, sell_rate_ves: Decimal | str, min_margin_pct: Decimal | str) -> Decimal:
+        """
+        Calcula el precio máximo de compra para garantizar el min_margin_pct.
+        """
+        sell_rate = Decimal(str(sell_rate_ves))
+        margin = Decimal(str(min_margin_pct))
+        
+        max_buy_rate = (sell_rate * (Decimal("1") - self.maker_fee)) / (margin + Decimal("1"))
+        return max_buy_rate
