@@ -17,19 +17,17 @@ async def strategy_loop(scanner: MarketScanner, strategy: StrategyEngine):
     """
     print("Iniciando loop de MarketScanner y StrategyEngine...")
     
-    # Precios de compra/venta fiat ficticios para el cálculo en VES
-    buy_rate_ves = Decimal("35.00")
-    sell_rate_ves = Decimal("36.00")
-    
     while True:
         try:
             # 1. Escanear competencia
             competitors = await scanner.get_top_competitors()
             top_sell_price = competitors["top_sell_price"]
+            top_buy_price = competitors["top_buy_price"]
             
-            if top_sell_price > Decimal("0"):
+            if top_sell_price > Decimal("0") and top_buy_price > Decimal("0"):
                 # 2. Evaluar estrategia y Circuit Breaker
-                result = strategy.calculate_sell_strategy(top_sell_price, buy_rate_ves)
+                # Usamos el top_buy_price real del mercado como referencia de tasa de compra (buy_rate_ves)
+                result = strategy.calculate_sell_strategy(top_sell_price, top_buy_price)
                 
                 # 3. Despachar alertas
                 await send_strategy_alert(result)

@@ -1,5 +1,6 @@
-from decimal import Decimal
 import asyncio
+import aiohttp
+from decimal import Decimal
 
 class BinanceP2PClient:
     """
@@ -7,6 +8,29 @@ class BinanceP2PClient:
     """
     def __init__(self, merchant_id: str | None = None):
         self.merchant_id = merchant_id
+        self.api_url = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search"
+
+    async def _fetch_page(self, trade_type: str, fiat: str, asset: str) -> list:
+        payload = {
+            "page": 1,
+            "rows": 10,
+            "asset": asset,
+            "tradeType": trade_type,
+            "fiat": fiat,
+            "publisherType": None
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.api_url, json=payload, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("data", [])
+                else:
+                    print(f"Error Binance API: {response.status}")
+                    return []
 
     async def get_orderbook(self, fiat: str = "VES", asset: str = "USDT") -> dict:
         """
@@ -14,15 +38,32 @@ class BinanceP2PClient:
         Asegura que los montos y precios (strings de la API JSON)
         se transformen y manipulen internamente como Decimal.
         """
-        # Simulación de latencia de red asíncrona
-        await asyncio.sleep(0)
+        # Para orderbook:
+        # sell_orders (asks) son tradeType = "BUY" (anuncios de vendedores, nosotros compramos)
+        # buy_orders (bids) son tradeType = "SELL" (anuncios de compradores, nosotros vendemos)
         
-        # Simulación de respuesta de Binance, parseada a Decimal en el adaptador
+        sell_data, buy_data = await asyncio.gather(
+            self._fetch_page("BUY", fiat, asset),
+            self._fetch_page("SELL", fiat, asset)
+        )
+        
+        sell_orders = []
+        for ad in sell_data:
+            adv = ad.get("adv", {})
+            sell_orders.append({
+                "price": Decimal(adv.get("price", "0")),
+                "available_asset": Decimal(adv.get("tradableQuantity", "0"))
+            })
+            
+        buy_orders = []
+        for ad in buy_data:
+            adv = ad.get("adv", {})
+            buy_orders.append({
+                "price": Decimal(adv.get("price", "0")),
+                "available_asset": Decimal(adv.get("tradableQuantity", "0"))
+            })
+            
         return {
-            "buy_orders": [
-                {"price": Decimal("35.10"), "available_asset": Decimal("150.00")}
-            ],
-            "sell_orders": [
-                {"price": Decimal("35.50"), "available_asset": Decimal("200.00")}
-            ]
+            "buy_orders": buy_orders,
+            "sell_orders": sell_orders
         }
