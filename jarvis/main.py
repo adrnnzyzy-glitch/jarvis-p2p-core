@@ -19,18 +19,18 @@ async def strategy_loop(scanner: MarketScanner, strategy: StrategyEngine):
     
     while True:
         try:
-            # 1. Escanear competencia
-            competitors = await scanner.get_top_competitors()
-            top_sell_price = competitors["top_sell_price"]
-            top_buy_price = competitors["top_buy_price"]
+            # 1. Escanear competencia con múltiples filtros
+            market_data = await scanner.get_multi_filter_competitors()
             
-            if top_sell_price > Decimal("0") and top_buy_price > Decimal("0"):
-                # 2. Evaluar estrategia y Circuit Breaker
-                # Usamos el top_buy_price real del mercado como referencia de tasa de compra (buy_rate_ves)
-                result = strategy.calculate_sell_strategy(top_sell_price, top_buy_price)
-                
+            # 2. Evaluar rentabilidad y estrategia multi-filtro
+            evaluation = strategy.evaluate_multi_filter_profitability(market_data)
+            
+            if "error" not in evaluation:
                 # 3. Despachar alertas
-                await send_strategy_alert(result)
+                filters_results = evaluation.get("filters", {})
+                for amount, result in filters_results.items():
+                    result["filter_amount"] = amount
+                    await send_strategy_alert(result)
                 
         except Exception as e:
             print(f"Error en strategy_loop: {e}")

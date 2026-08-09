@@ -10,7 +10,7 @@ class BinanceP2PClient:
         self.merchant_id = merchant_id
         self.api_url = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search"
 
-    async def _fetch_page(self, trade_type: str, fiat: str, asset: str) -> list:
+    async def _fetch_page(self, trade_type: str, fiat: str, asset: str, trans_amount: str | None = None) -> list:
         payload = {
             "page": 1,
             "rows": 10,
@@ -19,6 +19,8 @@ class BinanceP2PClient:
             "fiat": fiat,
             "publisherType": None
         }
+        if trans_amount:
+            payload["transAmount"] = trans_amount
         headers = {
             "Content-Type": "application/json",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -31,6 +33,15 @@ class BinanceP2PClient:
                 else:
                     print(f"Error Binance API: {response.status}")
                     return []
+
+    async def get_top_ad(self, trade_type: str, fiat: str = "VES", asset: str = "USDT", trans_amount: str | None = None) -> Decimal:
+        """
+        Obtiene el precio del mejor anuncio (Top 1) para un tipo de operación y filtro de monto.
+        """
+        data = await self._fetch_page(trade_type, fiat, asset, trans_amount)
+        if data:
+            return Decimal(data[0].get("adv", {}).get("price", "0"))
+        return Decimal("0")
 
     async def get_orderbook(self, fiat: str = "VES", asset: str = "USDT") -> dict:
         """

@@ -11,30 +11,45 @@ class MarketScanner:
     def __init__(self, client: BinanceP2PClient):
         self.client = client
 
-    async def get_top_competitors(self) -> Dict[str, Decimal]:
+    async def get_multi_filter_competitors(self) -> Dict[str, Dict[str, Decimal]]:
         """
-        Consulta el orderbook y extrae los mejores precios actuales (Top 1)
-        tanto para la compra como para la venta.
+        Escanea asíncronamente y en paralelo los mejores precios del mercado 
+        para diferentes filtros de montos en Bolívares.
+        
+        - Maker Sell (Pestaña Verde / BUY API): 20k, 50k, 100k VES
+        - Maker Buy (Pestaña Roja / SELL API): 20k, 30k, 50k VES
         
         Retorna:
-            Dict con 'top_buy_price' y 'top_sell_price'
+            Dict con 'maker_sell' y 'maker_buy', cada uno mapeando el filtro de monto al precio (Decimal).
         """
-        orderbook = await self.client.get_orderbook()
+        sell_filters = ["20000", "50000", "100000"]
+        buy_filters = ["20000", "30000", "50000"]
         
-        buy_orders = orderbook.get("buy_orders", [])
-        sell_orders = orderbook.get("sell_orders", [])
+        # Tareas para VENDER USDT (Maker Sell = TradeType BUY)
+        maker_sell_tasks = [
+            self.client.get_top_ad(trade_type="BUY", trans_amount=amount)
+            for amount in sell_filters
+        ]
         
-        top_buy_price = Decimal("0")
-        if buy_orders:
-            # Buscamos el precio más alto dispuesto a pagar por USDT
-            top_buy_price = max(order["price"] for order in buy_orders)
-            
-        top_sell_price = Decimal("0")
-        if sell_orders:
-            # Buscamos el precio más bajo dispuesto a vender USDT
-            top_sell_price = min(order["price"] for order in sell_orders)
-            
+        # Tareas para COMPRAR USDT (Maker Buy = TradeType SELL)
+        maker_buy_tasks = [
+            self.client.get_top_ad(trade_type="SELL", trans_amount=amount)
+            for amount in buy_filters
+        ]
+        
+        # Ejecutar todas las peticiones en paralelo
+        sell_results = await asyncio.gather(*maker_sell_tasks)
+        buy_results = await asyncio.gather(*maker_buy_tasks)
+        
+        maker_sell_prices = {
+            amount: price for amount, price in zip(sell_filters, sell_results) if price > Decimal("0")
+        }
+        
+        maker_buy_prices = {
+            amount: price for amount, price in zip(buy_filters, buy_results) if price > Decimal("0")
+        }
+        
         return {
-            "top_buy_price": top_buy_price,
-            "top_sell_price": top_sell_price
+            "maker_sell": maker_sell_prices,
+            "maker_buy": maker_buy_prices
         }
