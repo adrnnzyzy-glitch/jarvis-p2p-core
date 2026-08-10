@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     binance_rsa_private_key: Optional[str] = None
     binance_merchant_id: Optional[str] = None
     redis_host: Optional[str] = None
+    binance_api_key: str | None = None
+    binance_secret_key: str | None = None
+    executor_telegram_token: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

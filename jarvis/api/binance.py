@@ -81,3 +81,48 @@ class BinanceP2PClient:
             "buy_orders": buy_orders,
             "sell_orders": sell_orders
         }
+
+    # =========================================================================
+    # ENDPOINTS PRIVADOS (SIMULADOS) PARA EXECUTOR BOT
+    # =========================================================================
+    
+    async def get_active_orders(self) -> list:
+        """
+        [MOCK] Consulta las órdenes (Maker Buy) en estado 'Pendiente de Pago'.
+        Requiere autenticación oficial (API_KEY, SECRET_KEY) en producción.
+        """
+        print("[BINANCE API MOCK] Consultando órdenes activas pendientes de pago...")
+        await asyncio.sleep(1) # Simular latencia de red
+        # Retorna una orden simulada
+        return [{
+            "orderNumber": "1234567890",
+            "tradeType": "BUY",
+            "fiatAmount": "500.00",
+            "status": "PENDING_PAYMENT",
+            "counterPartNickName": "CambiosVzla"
+        }]
+        
+    async def upload_receipt_to_chat(self, order_id: str, file_path: str) -> bool:
+        """
+        [MOCK] Sube una imagen al chat de la orden P2P.
+        """
+        print(f"[BINANCE API MOCK] Subiendo recibo '{file_path}' al chat de la orden {order_id}...")
+        await asyncio.sleep(2)
+        return True
+        
+    async def send_chat_message(self, order_id: str, text: str) -> bool:
+        """
+        [MOCK] Envía un mensaje de texto al chat de la orden.
+        """
+        print(f"[BINANCE API MOCK] Enviando mensaje a orden {order_id}: '{text}'")
+        await asyncio.sleep(1)
+        return True
+        
+    async def mark_order_paid(self, order_id: str) -> bool:
+        """
+        [MOCK] Ejecuta el endpoint para marcar la orden como pagada.
+        """
+        print(f"[BINANCE API MOCK] Marcando orden {order_id} como PAGADA oficialmente.")
+        await asyncio.sleep(1)
+        return True
+
