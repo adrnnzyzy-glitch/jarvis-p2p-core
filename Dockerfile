@@ -23,6 +23,7 @@ RUN poetry config virtualenvs.create false \
 
 # Copiar el código fuente del orquestador
 COPY jarvis/ jarvis/
+COPY executor_bot.py ./
 
 # Ejecutar el orquestador asíncrono
 CMD ["python", "-m", "jarvis.main"]
