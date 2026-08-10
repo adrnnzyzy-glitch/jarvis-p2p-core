@@ -22,7 +22,7 @@ class MarketScanner:
         Retorna:
             Dict con 'maker_sell' y 'maker_buy', cada uno mapeando el filtro de monto al precio (Decimal).
         """
-        sell_filters = ["20000", "50000", "100000"]
+        sell_filters = ["20000", "50000", "100000", "500000"]
         buy_filters = ["20000", "30000", "50000"]
         
         # Tareas para VENDER USDT (Maker Sell = TradeType BUY)

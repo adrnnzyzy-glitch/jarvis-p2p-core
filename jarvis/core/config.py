@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/jarvis_db"
     admin_telegram_ids: list[int] = [8702518274] # ID de admin por defecto
-    min_net_margin_pct: Decimal = Decimal("0.006") # Regla de protección de capital
+    min_net_margin_pct: Decimal = Decimal("0.008") # Regla de protección de capital
     capital_usdt: Decimal = Decimal("2000.00") # Capital de trabajo
     
     # Variables NO vitales (Obligatoriamente opcionales)
