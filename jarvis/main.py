@@ -27,9 +27,8 @@ async def strategy_loop(scanner: MarketScanner, strategy: StrategyEngine):
             
             if "error" not in evaluation:
                 # 3. Despachar alertas
-                filters_results = evaluation.get("filters", {})
-                for amount, result in filters_results.items():
-                    result["filter_amount"] = amount
+                results = evaluation.get("results", [])
+                for result in results:
                     await send_strategy_alert(result)
                 
         except Exception as e:

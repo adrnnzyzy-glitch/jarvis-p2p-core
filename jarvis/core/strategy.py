@@ -74,28 +74,38 @@ class StrategyEngine:
 
     def evaluate_multi_filter_profitability(self, market_data: Dict[str, Dict[str, dict]]) -> Dict[str, Any]:
         """
-        Evalúa la rentabilidad para cada filtro de venta (Maker Sell),
-        usando el peor precio de compra (Maker Buy más alto) como base de costo.
+        Evalúa la rentabilidad para cada filtro de venta (Maker Sell) y compra (Maker Buy).
         """
         maker_sell = market_data.get("maker_sell", {})
         maker_buy = market_data.get("maker_buy", {})
         
-        # Opción A: Usar el precio Maker Buy más alto (peor caso) como costo base
-        if not maker_buy:
-            return {"error": "No hay datos de Maker Buy para calcular costos."}
+        if not maker_buy or not maker_sell:
+            return {"error": "Faltan datos de mercado para calcular la rentabilidad cruzada."}
             
-        cost_basis = max(ad["price"] for ad in maker_buy.values())
+        # Opción A: Usar el peor caso cruzado como bases
+        buy_cost_basis = max(ad["price"] for ad in maker_buy.values())
+        sell_revenue_basis = min(ad["price"] for ad in maker_sell.values())
         
-        results = {}
+        results = []
+        
+        # Estrategias de Venta (Maker Sell)
         for filter_amount, ad_data in maker_sell.items():
             top_sell_price = ad_data["price"]
             competitor_name = ad_data["nickName"]
-            # Calculate strategy for this specific filter
-            strategy_result = self.calculate_sell_strategy(top_sell_price, cost_basis)
+            strategy_result = self.calculate_sell_strategy(top_sell_price, buy_cost_basis)
             strategy_result["competitor_name"] = competitor_name
-            results[filter_amount] = strategy_result
+            strategy_result["filter_amount"] = filter_amount
+            results.append(strategy_result)
+            
+        # Estrategias de Compra (Maker Buy)
+        for filter_amount, ad_data in maker_buy.items():
+            top_buy_price = ad_data["price"]
+            competitor_name = ad_data["nickName"]
+            strategy_result = self.calculate_buy_strategy(top_buy_price, sell_revenue_basis)
+            strategy_result["competitor_name"] = competitor_name
+            strategy_result["filter_amount"] = filter_amount
+            results.append(strategy_result)
             
         return {
-            "cost_basis": cost_basis,
-            "filters": results
+            "results": results
         }

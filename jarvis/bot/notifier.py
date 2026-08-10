@@ -23,7 +23,7 @@ async def send_strategy_alert(strategy_result: Dict[str, Any]):
     filter_amount = strategy_result.get("filter_amount", "N/A")
     competitor_name = strategy_result.get("competitor_name", "Desconocido")
     
-    emoji = "🔴" if action == "SELL" else "🟢"
+    emoji = "🟢" if action == "SELL" else "🔴"
     breaker_msg = "⚠️ <b>CIRCUIT BREAKER ACTIVADO</b> (Se protegió el margen mínimo)\n" if breaker else "✅ Margen Saludable\n"
     
     margin_pct_display = float(settings.min_net_margin_pct) * 100
