@@ -35,14 +35,16 @@ class BinanceP2PClient:
                     print(f"Error Binance API: {response.status}")
                     return []
 
-    async def get_top_ad(self, trade_type: str, fiat: str = "VES", asset: str = "USDT", trans_amount: str | None = None) -> Decimal:
+    async def get_top_ad(self, trade_type: str, fiat: str = "VES", asset: str = "USDT", trans_amount: str | None = None) -> dict:
         """
-        Obtiene el precio del mejor anuncio (Top 1) para un tipo de operación y filtro de monto.
+        Obtiene los datos del mejor anuncio (Top 1) para un tipo de operación y filtro de monto.
         """
         data = await self._fetch_page(trade_type, fiat, asset, trans_amount)
         if data:
-            return Decimal(data[0].get("adv", {}).get("price", "0"))
-        return Decimal("0")
+            price = Decimal(data[0].get("adv", {}).get("price", "0"))
+            nickName = data[0].get("advertiser", {}).get("nickName", "Desconocido")
+            return {"price": price, "nickName": nickName}
+        return {"price": Decimal("0"), "nickName": "N/A"}
 
     async def get_orderbook(self, fiat: str = "VES", asset: str = "USDT") -> dict:
         """

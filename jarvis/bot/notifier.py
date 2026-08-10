@@ -21,6 +21,7 @@ async def send_strategy_alert(strategy_result: Dict[str, Any]):
     suggested_price = strategy_result.get("suggested_price")
     breaker = strategy_result.get("circuit_breaker_tripped")
     filter_amount = strategy_result.get("filter_amount", "N/A")
+    competitor_name = strategy_result.get("competitor_name", "Desconocido")
     
     emoji = "🔴" if action == "SELL" else "🟢"
     breaker_msg = "⚠️ <b>CIRCUIT BREAKER ACTIVADO</b> (Se protegió el margen mínimo)\n" if breaker else "✅ Margen Saludable\n"
@@ -32,7 +33,7 @@ async def send_strategy_alert(strategy_result: Dict[str, Any]):
         f"🏦 <b>Banco:</b> Banesco\n"
         f"✅ <b>Estatus:</b> Comerciante Verificado\n"
         f"🎯 <b>Filtro Aplicado:</b> {filter_amount} VES\n\n"
-        f"<b>Competencia Top 1:</b> {competitor_price} VES\n"
+        f"🥇 <b>Top 1 ({competitor_name}):</b> {competitor_price} VES\n"
         f"<b>Precio Ideal (-0.01):</b> {ideal_price} VES\n"
         f"<b>Precio Sugerido:</b> <code>{suggested_price}</code> VES\n\n"
         f"💰 <b>Capital Base:</b> {settings.capital_usdt} USDT\n"

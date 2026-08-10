@@ -72,7 +72,7 @@ class StrategyEngine:
             "circuit_breaker_tripped": circuit_breaker_tripped
         }
 
-    def evaluate_multi_filter_profitability(self, market_data: Dict[str, Dict[str, Decimal]]) -> Dict[str, Any]:
+    def evaluate_multi_filter_profitability(self, market_data: Dict[str, Dict[str, dict]]) -> Dict[str, Any]:
         """
         Evalúa la rentabilidad para cada filtro de venta (Maker Sell),
         usando el peor precio de compra (Maker Buy más alto) como base de costo.
@@ -84,12 +84,15 @@ class StrategyEngine:
         if not maker_buy:
             return {"error": "No hay datos de Maker Buy para calcular costos."}
             
-        cost_basis = max(maker_buy.values())
+        cost_basis = max(ad["price"] for ad in maker_buy.values())
         
         results = {}
-        for filter_amount, top_sell_price in maker_sell.items():
+        for filter_amount, ad_data in maker_sell.items():
+            top_sell_price = ad_data["price"]
+            competitor_name = ad_data["nickName"]
             # Calculate strategy for this specific filter
             strategy_result = self.calculate_sell_strategy(top_sell_price, cost_basis)
+            strategy_result["competitor_name"] = competitor_name
             results[filter_amount] = strategy_result
             
         return {

@@ -11,7 +11,7 @@ class MarketScanner:
     def __init__(self, client: BinanceP2PClient):
         self.client = client
 
-    async def get_multi_filter_competitors(self) -> Dict[str, Dict[str, Decimal]]:
+    async def get_multi_filter_competitors(self) -> Dict[str, Dict[str, dict]]:
         """
         Escanea asíncronamente y en paralelo los mejores precios del mercado 
         para diferentes filtros de montos en Bolívares.
@@ -42,11 +42,11 @@ class MarketScanner:
         buy_results = await asyncio.gather(*maker_buy_tasks)
         
         maker_sell_prices = {
-            amount: price for amount, price in zip(sell_filters, sell_results) if price > Decimal("0")
+            amount: ad_data for amount, ad_data in zip(sell_filters, sell_results) if ad_data["price"] > Decimal("0")
         }
         
         maker_buy_prices = {
-            amount: price for amount, price in zip(buy_filters, buy_results) if price > Decimal("0")
+            amount: ad_data for amount, ad_data in zip(buy_filters, buy_results) if ad_data["price"] > Decimal("0")
         }
         
         return {
